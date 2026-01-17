@@ -12,7 +12,7 @@ Usage:
                 "command": "python",
                 "args": ["-m", "kagglerun.mcp_server"],
                 "env": {
-                    "KAGGLE_JUPYTER_URL": "your-url-here"
+                    "KAGGLE_JUPYTER_URL": "your-kaggle-url (format auto-detected)"
                 }
             }
         }

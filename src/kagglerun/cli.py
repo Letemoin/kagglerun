@@ -42,7 +42,7 @@ Environment:
 Get your URL:
   1. Open Kaggle notebook with GPU
   2. Click "..." menu -> "Copy VS Code Server URL"
-  3. Add "/proxy" to the end of the URL
+  3. Use the URL directly (format auto-detected)
 '''
     )
 
@@ -75,7 +75,7 @@ Get your URL:
         print("\nTo get your URL:", file=sys.stderr)
         print("  1. Open Kaggle notebook with GPU enabled", file=sys.stderr)
         print("  2. Click '...' menu -> 'Copy VS Code Server URL'", file=sys.stderr)
-        print("  3. Add '/proxy' to the end", file=sys.stderr)
+        print("  3. Use the URL directly (format auto-detected)", file=sys.stderr)
         return 1
 
     # Only add /proxy for path-based URLs (not query parameter format)

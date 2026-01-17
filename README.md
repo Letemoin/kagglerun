@@ -39,10 +39,10 @@ kagglerun --url <your-kaggle-url> "import torch; print(torch.cuda.get_device_nam
 1. Go to [kaggle.com/code](https://www.kaggle.com/code) and create a new notebook
 2. Enable GPU: **Settings** → **Accelerator** → **GPU T4 x2** or **GPU P100**
 3. Click the **"..."** menu → **"Copy VS Code Server URL"**
-4. Add `/proxy` to the end of the URL
 
-Your URL looks like:
+Your URL looks like one of these formats (both work automatically):
 ```
+https://kkb-production.jupyter-proxy.kaggle.net?token=eyJ...
 https://kkb-production.jupyter-proxy.kaggle.net/k/123456/eyJ.../proxy
 ```
 
@@ -53,7 +53,7 @@ https://kkb-production.jupyter-proxy.kaggle.net/k/123456/eyJ.../proxy
 pip install kagglerun
 
 # Set URL (optional - avoids --url each time)
-export KAGGLE_JUPYTER_URL="https://your-url-here/proxy"
+export KAGGLE_JUPYTER_URL="https://your-kaggle-url-here"
 
 # Execute code
 kagglerun "print('Hello from Kaggle GPU!')"
@@ -105,8 +105,8 @@ kagglerun --test
 ```python
 from kagglerun import KaggleExecutor
 
-# Connect
-executor = KaggleExecutor("https://your-kaggle-url/proxy")
+# Connect (URL format auto-detected)
+executor = KaggleExecutor("https://your-kaggle-url")
 
 # Execute code
 result = executor.execute("""
@@ -155,7 +155,7 @@ KaggleRun includes a Model Context Protocol (MCP) server, allowing AI assistants
          "command": "python",
          "args": ["-m", "kagglerun.mcp_server"],
          "env": {
-           "KAGGLE_JUPYTER_URL": "https://your-kaggle-url/proxy"
+           "KAGGLE_JUPYTER_URL": "https://your-kaggle-url"
          }
        }
      }
@@ -266,7 +266,7 @@ print("Submission ready!")
 
 ```python
 executor = KaggleExecutor(
-    base_url: str,           # Kaggle Jupyter proxy URL
+    base_url: str,           # Kaggle Jupyter URL (auto-detects format)
     verbose: bool = True,    # Print status messages
     timeout: int = 120,      # Default execution timeout (seconds)
     on_output: Callable = None  # Callback for streaming output
@@ -294,7 +294,7 @@ executor = KaggleExecutor(
 ```python
 from kagglerun import connect
 
-executor = connect("https://your-url/proxy")  # Raises ConnectionError if fails
+executor = connect("https://your-kaggle-url")  # Raises ConnectionError if fails
 ```
 
 ---
@@ -330,8 +330,8 @@ executor = connect("https://your-url/proxy")  # Raises ConnectionError if fails
 
 ### "Connection failed"
 - Ensure your Kaggle notebook is running (green "Running" status)
-- Check that your URL ends with `/proxy`
-- Get a fresh URL if token expired
+- Get a fresh URL if token expired (tokens expire periodically)
+- Verify the notebook has GPU enabled and is not idle
 
 ### "Kernel is busy"
 - KaggleRun auto-interrupts busy kernels
