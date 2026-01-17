@@ -34,6 +34,7 @@ try:
         TextContent,
         CallToolResult,
     )
+    from mcp.server.models import InitializationOptions
     MCP_AVAILABLE = True
 except ImportError:
     MCP_AVAILABLE = False
@@ -266,7 +267,15 @@ def run_server():
 
     async def main():
         async with stdio_server() as (read_stream, write_stream):
-            await server.run(read_stream, write_stream)
+            init_options = InitializationOptions(
+                server_name="kagglerun",
+                server_version="0.3.1",
+                capabilities=server.get_capabilities(
+                    notification_options=None,
+                    experimental_capabilities={},
+                ),
+            )
+            await server.run(read_stream, write_stream, init_options)
 
     asyncio.run(main())
 
