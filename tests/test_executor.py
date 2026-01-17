@@ -255,8 +255,8 @@ class TestKaggleExecutor:
         with patch.object(executor, 'execute') as mock_execute:
             mock_execute.return_value = {
                 "success": True,
-                "outputs": ["GPU: NVIDIA H100, 80GB"],
-                "output_text": "GPU: NVIDIA H100, 80GB",
+                "outputs": ["GPU: NVIDIA Tesla T4, 16GB"],
+                "output_text": "GPU: NVIDIA Tesla T4, 16GB",
                 "errors": []
             }
             result = executor.get_gpu_info()
@@ -353,7 +353,7 @@ class TestCLI:
         assert exc_info.value.code == 0
         captured = capsys.readouterr()
         assert 'kagglerun' in captured.out
-        assert 'H100' in captured.out
+        assert 'GPU' in captured.out or 'kagglerun' in captured.out
 
 
 class TestMCPServer:

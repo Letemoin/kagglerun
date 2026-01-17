@@ -44,7 +44,7 @@ from .executor import KaggleExecutor
 TOOLS = [
     {
         "name": "execute_python",
-        "description": "Execute Python code on Kaggle's free H100 GPU. Returns stdout/stderr and execution status. Use for ML training, data processing, or any GPU-intensive tasks.",
+        "description": "Execute Python code on Kaggle's free GPU (T4, P100, or other available). Returns stdout/stderr and execution status. Use for ML training, data processing, or any GPU-intensive tasks.",
         "inputSchema": {
             "type": "object",
             "properties": {

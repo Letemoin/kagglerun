@@ -5,14 +5,14 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
-**Execute Python on Kaggle's FREE H100 GPUs from your terminal. No browser needed.**
+**Execute Python on Kaggle's FREE GPUs from your terminal. No browser needed.**
 
 Perfect for AI coding agents like Claude Code, Cursor, and Cline.
 
 ```bash
 pip install kagglerun
 kagglerun --url <your-kaggle-url> "import torch; print(torch.cuda.get_device_name(0))"
-# Output: NVIDIA H100 80GB HBM3
+# Output: NVIDIA Tesla T4 (or P100, H100 depending on availability)
 ```
 
 ---
@@ -24,7 +24,7 @@ kagglerun --url <your-kaggle-url> "import torch; print(torch.cuda.get_device_nam
 | No browser needed | **Yes** | No | No | No |
 | CLI-native | **Yes** | No | No | Partial |
 | AI agent ready (MCP) | **Yes** | No | No | No |
-| Free H100 GPU | **Yes** | Yes | No | No |
+| Free GPU (T4/P100/H100) | **Yes** | Yes | No | No |
 | Real-time output | **Yes** | Yes | Yes | Yes |
 | Cost | **$0** | $0 | $0-10/mo | $0.50+/hr |
 
@@ -56,7 +56,7 @@ pip install kagglerun
 export KAGGLE_JUPYTER_URL="https://your-url-here/proxy"
 
 # Execute code
-kagglerun "print('Hello from H100!')"
+kagglerun "print('Hello from Kaggle GPU!')"
 
 # Run a Python file
 kagglerun train.py
@@ -173,7 +173,7 @@ KaggleRun includes a Model Context Protocol (MCP) server, allowing AI assistants
 
 > You: "Train a ResNet18 on CIFAR-10 using the Kaggle GPU"
 >
-> Claude: *Uses execute_python tool to run training on H100*
+> Claude: *Uses execute_python tool to run training on Kaggle GPU*
 
 ---
 
@@ -307,7 +307,7 @@ executor = connect("https://your-url/proxy")  # Raises ConnectionError if fails
 │   or AI Agent    │                   │     Server        │
 │                  │     WebSocket     │                   │
 │  kagglerun       │ ◄══════════════► │  Python Kernel    │
-│                  │   (real-time)     │  (H100 GPU)       │
+│                  │   (real-time)     │  (GPU: T4/P100)   │
 └──────────────────┘                   └───────────────────┘
 ```
 

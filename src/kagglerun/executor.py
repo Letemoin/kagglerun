@@ -13,7 +13,7 @@ import base64
 import threading
 from datetime import datetime
 from typing import Optional, Dict, Any, List, Callable
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs, urlencode
 
 try:
     import requests
@@ -29,8 +29,13 @@ class KaggleExecutor:
     Execute Python code on Kaggle's free GPU kernels.
 
     Usage:
-        executor = KaggleExecutor("https://your-kaggle-jupyter-url/proxy")
-        result = executor.execute("print('Hello from H100!')")
+        # Query parameter format (from Kaggle notebook URL)
+        executor = KaggleExecutor("https://kkb-production.jupyter-proxy.kaggle.net?token=xxx")
+
+        # Path format (from VS Code Server URL)
+        executor = KaggleExecutor("https://kkb-production.jupyter-proxy.kaggle.net/k/123/jwt/proxy")
+
+        result = executor.execute("print('Hello from Kaggle GPU!')")
         print(result['output_text'])
 
     Features:
@@ -51,17 +56,33 @@ class KaggleExecutor:
         Initialize KaggleExecutor.
 
         Args:
-            base_url: Kaggle Jupyter proxy URL (from VS Code Server URL)
+            base_url: Kaggle Jupyter URL (supports both ?token= and /proxy formats)
             verbose: Print status messages (default: True)
             timeout: Default execution timeout in seconds (default: 120)
             on_output: Optional callback for real-time output streaming
         """
-        self.base_url = base_url.rstrip('/')
         self.verbose = verbose
         self.default_timeout = timeout
         self.on_output = on_output
         self.kernel_id: Optional[str] = None
         self._session = requests.Session()
+
+        # Parse URL to detect format
+        parsed = urlparse(base_url)
+        self._token = None
+
+        if parsed.query and 'token=' in parsed.query:
+            # Query parameter format: https://host?token=xxx
+            query_params = parse_qs(parsed.query)
+            self._token = query_params.get('token', [None])[0]
+            self.base_url = f"{parsed.scheme}://{parsed.netloc}"
+            self._url_format = "query"
+        else:
+            # Path format: https://host/k/id/jwt/proxy
+            self.base_url = base_url.rstrip('/')
+            if not self.base_url.endswith('/proxy'):
+                self.base_url = self.base_url + '/proxy' if not self.base_url.endswith('/') else self.base_url + 'proxy'
+            self._url_format = "path"
 
         # Disable websocket trace
         websocket.enableTrace(False)
@@ -72,6 +93,25 @@ class KaggleExecutor:
             timestamp = datetime.now().strftime('%H:%M:%S')
             print(f"[{timestamp}] {msg}")
 
+    def _build_url(self, path: str) -> str:
+        """Build URL with proper token handling for both formats."""
+        if self._url_format == "query":
+            # Query format: append token as query param
+            separator = "&" if "?" in path else "?"
+            return f"{self.base_url}{path}{separator}token={self._token}"
+        else:
+            # Path format: just append path
+            return f"{self.base_url}{path}"
+
+    def _build_ws_url(self, path: str) -> str:
+        """Build WebSocket URL with proper token handling."""
+        if self._url_format == "query":
+            ws_base = self.base_url.replace("https://", "wss://").replace("http://", "ws://")
+            return f"{ws_base}{path}?token={self._token}"
+        else:
+            ws_base = self.base_url.replace("https://", "wss://").replace("http://", "ws://")
+            return f"{ws_base}{path}"
+
     def test_connection(self) -> bool:
         """
         Test connectivity to Kaggle Jupyter API.
@@ -80,7 +120,7 @@ class KaggleExecutor:
             True if connection successful, False otherwise
         """
         try:
-            r = self._session.get(f"{self.base_url}/api", timeout=10)
+            r = self._session.get(self._build_url("/api"), timeout=10)
             return r.status_code == 200
         except Exception:
             return False
@@ -99,7 +139,7 @@ class KaggleExecutor:
         if not kid:
             return 'unknown'
         try:
-            r = self._session.get(f"{self.base_url}/api/kernels/{kid}", timeout=10)
+            r = self._session.get(self._build_url(f"/api/kernels/{kid}"), timeout=10)
             if r.status_code == 200:
                 return r.json().get('execution_state', 'unknown')
         except Exception:
@@ -139,7 +179,7 @@ class KaggleExecutor:
         """
         # Try to use existing kernel
         try:
-            r = self._session.get(f"{self.base_url}/api/kernels", timeout=10)
+            r = self._session.get(self._build_url("/api/kernels"), timeout=10)
             if r.status_code == 200:
                 kernels = r.json()
                 if kernels:
@@ -152,7 +192,7 @@ class KaggleExecutor:
         # Create new kernel
         try:
             r = self._session.post(
-                f"{self.base_url}/api/kernels",
+                self._build_url("/api/kernels"),
                 json={"name": "python3"},
                 timeout=30
             )
@@ -176,7 +216,7 @@ class KaggleExecutor:
             return False
         try:
             r = self._session.post(
-                f"{self.base_url}/api/kernels/{self.kernel_id}/interrupt",
+                self._build_url(f"/api/kernels/{self.kernel_id}/interrupt"),
                 timeout=10
             )
             return r.status_code in [200, 204]
@@ -234,8 +274,7 @@ class KaggleExecutor:
                 self._log("Warning: Kernel not idle, proceeding anyway")
 
         # Build WebSocket URL
-        ws_url = self.base_url.replace("https://", "wss://").replace("http://", "ws://")
-        ws_url = f"{ws_url}/api/kernels/{self.kernel_id}/channels"
+        ws_url = self._build_ws_url(f"/api/kernels/{self.kernel_id}/channels")
 
         try:
             ws = websocket.create_connection(

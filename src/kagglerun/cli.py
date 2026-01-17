@@ -26,11 +26,11 @@ def main(args: Optional[list] = None) -> int:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         prog='kagglerun',
-        description='Execute Python on Kaggle\'s FREE H100 GPUs from your terminal.',
+        description='Execute Python on Kaggle\'s FREE GPUs from your terminal.',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 Examples:
-  kagglerun --url <URL> "print('Hello from H100!')"
+  kagglerun --url <URL> "print('Hello from Kaggle GPU!')"
   kagglerun --url <URL> script.py
   kagglerun --url <URL> --gpu-info
   kagglerun --url <URL> --upload local.py --as remote.py
@@ -78,8 +78,8 @@ Get your URL:
         print("  3. Add '/proxy' to the end", file=sys.stderr)
         return 1
 
-    # Ensure URL ends properly
-    if not url.endswith('/proxy'):
+    # Only add /proxy for path-based URLs (not query parameter format)
+    if '?token=' not in url and not url.endswith('/proxy'):
         if url.endswith('/'):
             url = url + 'proxy'
         else:

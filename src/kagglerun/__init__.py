@@ -1,10 +1,10 @@
 """
-KaggleRun - Execute Python on Kaggle's FREE H100 GPUs from your terminal.
+KaggleRun - Execute Python on Kaggle's FREE GPUs from your terminal.
 
 No browser needed. Perfect for AI agents like Claude Code.
 """
 
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 __author__ = "KaggleRun Contributors"
 
 from .executor import KaggleExecutor
