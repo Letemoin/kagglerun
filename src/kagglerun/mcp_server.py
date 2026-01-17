@@ -157,7 +157,8 @@ def get_executor() -> KaggleExecutor:
             "Set it to your Kaggle Jupyter proxy URL."
         )
 
-    if not url.endswith('/proxy'):
+    # Only add /proxy for path-based URLs, not query parameter format
+    if '?token=' not in url and not url.endswith('/proxy'):
         url = url.rstrip('/') + '/proxy'
 
     return KaggleExecutor(url, verbose=False)
