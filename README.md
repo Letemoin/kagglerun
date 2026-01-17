@@ -202,19 +202,168 @@ executor.list_files()
 
 ## MCP Server
 
-KaggleRun includes a **Model Context Protocol (MCP)** server, enabling AI assistants like Claude Code to execute code on Kaggle GPUs as a native tool.
+KaggleRun includes a **Model Context Protocol (MCP)** server, enabling AI assistants like Claude to execute code on Kaggle GPUs as a native tool.
 
-### Setup
+### Step 1: Install
 
-1. **Install with MCP support:**
-   ```bash
-   pip install kagglerun[mcp]
-   ```
+```bash
+pip install kagglerun[mcp]
+```
 
-2. **Configure Claude Code** (`~/.claude/mcp_settings.json`):
+### Step 2: Set Environment Variable (Recommended)
+
+Set `KAGGLE_JUPYTER_URL` as a **permanent system variable** so all AI tools can use it automatically.
+
+<details>
+<summary><b>Windows (CMD) - Run as Administrator</b></summary>
+
+```cmd
+:: Set permanently (requires terminal restart)
+setx KAGGLE_JUPYTER_URL "https://kkb-production.jupyter-proxy.kaggle.net?token=eyJ..."
+
+:: Also set for current session
+set KAGGLE_JUPYTER_URL=https://kkb-production.jupyter-proxy.kaggle.net?token=eyJ...
+
+:: Verify (in NEW terminal)
+echo %KAGGLE_JUPYTER_URL%
+```
+
+> **Note:** After `setx`, close and reopen your terminal (or restart your IDE/Claude) for changes to take effect.
+
+</details>
+
+<details>
+<summary><b>Windows (PowerShell) - Run as Administrator</b></summary>
+
+```powershell
+# Set permanently (Machine level - all users)
+[Environment]::SetEnvironmentVariable("KAGGLE_JUPYTER_URL", "https://kkb-production.jupyter-proxy.kaggle.net?token=eyJ...", "Machine")
+
+# Or User level only
+[Environment]::SetEnvironmentVariable("KAGGLE_JUPYTER_URL", "https://kkb-production.jupyter-proxy.kaggle.net?token=eyJ...", "User")
+
+# Also set for current session
+$env:KAGGLE_JUPYTER_URL = "https://kkb-production.jupyter-proxy.kaggle.net?token=eyJ..."
+
+# Verify
+echo $env:KAGGLE_JUPYTER_URL
+```
+
+</details>
+
+<details>
+<summary><b>Linux / macOS</b></summary>
+
+```bash
+# Add to ~/.bashrc (Linux) or ~/.zshrc (macOS)
+echo 'export KAGGLE_JUPYTER_URL="https://kkb-production.jupyter-proxy.kaggle.net?token=eyJ..."' >> ~/.bashrc
+
+# Reload
+source ~/.bashrc
+
+# Verify
+echo $KAGGLE_JUPYTER_URL
+```
+
+</details>
+
+### Step 3: Configure MCP Client
+
+Add KaggleRun to your AI assistant's MCP configuration.
+
+#### Claude Desktop
 
 <details>
 <summary><b>Windows</b></summary>
+
+**Config file:** `C:\Users\{username}\AppData\Roaming\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "kagglerun": {
+      "command": "python",
+      "args": ["-m", "kagglerun.mcp_server"]
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>macOS</b></summary>
+
+**Config file:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "kagglerun": {
+      "command": "python3",
+      "args": ["-m", "kagglerun.mcp_server"]
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><b>Linux</b></summary>
+
+**Config file:** `~/.config/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "kagglerun": {
+      "command": "python3",
+      "args": ["-m", "kagglerun.mcp_server"]
+    }
+  }
+}
+```
+
+</details>
+
+#### Claude Code (CLI)
+
+<details>
+<summary><b>All Platforms</b></summary>
+
+**Config file:** `~/.claude/mcp_settings.json`
+
+| OS | Full Path |
+|:---|:----------|
+| Windows | `C:\Users\{username}\.claude\mcp_settings.json` |
+| macOS | `/Users/{username}/.claude/mcp_settings.json` |
+| Linux | `/home/{username}/.claude/mcp_settings.json` |
+
+```json
+{
+  "mcpServers": {
+    "kagglerun": {
+      "command": "python",
+      "args": ["-m", "kagglerun.mcp_server"]
+    }
+  }
+}
+```
+
+</details>
+
+#### Other MCP-Compatible Tools
+
+| Tool | Config Location |
+|:-----|:----------------|
+| **Cursor** | Settings → MCP → Add Server |
+| **Cline** | `.cline/mcp_settings.json` |
+| **Continue** | `~/.continue/config.json` |
+
+### Alternative: Pass URL in Config
+
+If you prefer not to set a system environment variable, include the URL directly in the MCP config:
 
 ```json
 {
@@ -230,26 +379,14 @@ KaggleRun includes a **Model Context Protocol (MCP)** server, enabling AI assist
 }
 ```
 
-</details>
+### Verify MCP Server
 
-<details>
-<summary><b>Linux / macOS</b></summary>
+Test the server is working:
 
-```json
-{
-  "mcpServers": {
-    "kagglerun": {
-      "command": "python3",
-      "args": ["-m", "kagglerun.mcp_server"],
-      "env": {
-        "KAGGLE_JUPYTER_URL": "https://kkb-production.jupyter-proxy.kaggle.net?token=eyJ..."
-      }
-    }
-  }
-}
+```bash
+# Should start without errors (Ctrl+C to exit)
+python -m kagglerun.mcp_server
 ```
-
-</details>
 
 ### Available Tools
 
