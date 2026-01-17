@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Letemoin/kagglerun/main/assets/logo.svg" alt="KaggleRun Logo" width="400">
+  <img src="https://raw.githubusercontent.com/Letemoin/kagglerun/master/assets/logo.svg" alt="KaggleRun Logo" width="400">
 </p>
 
 <h1 align="center">KaggleRun</h1>
