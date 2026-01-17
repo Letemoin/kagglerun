@@ -4,7 +4,7 @@ KaggleRun - Execute Python on Kaggle's FREE GPUs from your terminal.
 No browser needed. Perfect for AI agents like Claude Code.
 """
 
-__version__ = "0.2.3"
+__version__ = "0.2.4"
 __author__ = "KaggleRun Contributors"
 
 from .executor import KaggleExecutor

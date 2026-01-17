@@ -69,6 +69,8 @@ Get your URL:
 
     # Get URL
     url = parsed.url or get_url_from_env()
+    if url:
+        url = url.strip('"').strip("'")  # Strip quotes (Windows CMD includes them)
     if not url:
         print("Error: No Kaggle URL provided.", file=sys.stderr)
         print("Use --url or set KAGGLE_JUPYTER_URL environment variable.", file=sys.stderr)

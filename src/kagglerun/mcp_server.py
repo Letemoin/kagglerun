@@ -152,6 +152,8 @@ TOOLS = [
 def get_executor() -> KaggleExecutor:
     """Get configured KaggleExecutor from environment."""
     url = os.environ.get('KAGGLE_JUPYTER_URL')
+    if url:
+        url = url.strip('"').strip("'")  # Strip quotes (Windows CMD includes them)
     if not url:
         raise ValueError(
             "KAGGLE_JUPYTER_URL environment variable not set. "
